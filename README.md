@@ -1,5 +1,7 @@
 # 唐社长者学院部署仓库
 
+当前生产服务器的实际运维信息见 [`SERVER-DEPLOYMENT.md`](SERVER-DEPLOYMENT.md)。
+
 本仓库包含：
 
 - `frontend/`：Next.js 前端，使用 standalone 生产镜像。
