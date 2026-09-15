@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.production.example
+initial-credentials.txt
+*.dump
+*.backup
+backups/
+frontend/node_modules/
+frontend/.next/
+backend/target/

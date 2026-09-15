@@ -1,0 +1,43 @@
+spring:
+  servlet:
+    multipart:
+      # 单个文件最大大小
+      max-file-size: 5MB
+      # 单次请求最大大小
+      max-request-size: 10MB
+      # 是否启用文件上传
+      enabled: true
+  application:
+    name: course
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/course?stringtype=unspecified}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-test-query: SELECT 1
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+    serialization:
+      write-dates-as-timestamps: false
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY:development-access-secret-change-before-production}
+  refresh-secret-key: ${JWT_REFRESH_SECRET_KEY:development-refresh-secret-change-before-production}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+cloudflare:
+  r2:
+    access-key: ${R2_ACCESS_KEY:development-access-key}
+    secret-key: ${R2_SECRET_KEY:development-secret-key}
+    bucket-name: ${R2_BUCKET_NAME:course-pics}
+    endpoint: ${R2_ENDPOINT:http://localhost:9000}
+    region: ${R2_REGION:auto}
+    public-url: ${R2_PUBLIC_URL:http://localhost:9000/course-pics}
+
+server:
+  port: ${SERVER_PORT:3001}

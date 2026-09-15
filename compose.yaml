@@ -1,0 +1,99 @@
+name: tangshe
+
+services:
+  database:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - max_connections=40
+      - -c
+      - work_mem=2MB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/resources/file_uploads_table.sql:/docker-entrypoint-initdb.d/02-file-uploads.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: ${POSTGRES_MEMORY_LIMIT:-512m}
+    cpus: 0.75
+    shm_size: 128mb
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB}?stringtype=unspecified
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      SERVER_PORT: 3001
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_REFRESH_SECRET_KEY: ${JWT_REFRESH_SECRET_KEY}
+      R2_ACCESS_KEY: ${R2_ACCESS_KEY:-disabled}
+      R2_SECRET_KEY: ${R2_SECRET_KEY:-disabled}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME:-course-pics}
+      R2_ENDPOINT: ${R2_ENDPOINT:-http://127.0.0.1:9000}
+      R2_REGION: ${R2_REGION:-auto}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:-}
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx384m -XX:+UseSerialGC -XX:MaxMetaspaceSize=192m
+    ports:
+      - 127.0.0.1:3001:3001
+    mem_limit: ${BACKEND_MEMORY_LIMIT:-768m}
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-/api}
+        NEXT_PUBLIC_IMAGE_BASE_URL: ${PUBLIC_IMAGE_BASE_URL:-}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NODE_OPTIONS: --max-old-space-size=320
+    ports:
+      - 127.0.0.1:3000:3000
+    mem_limit: ${FRONTEND_MEMORY_LIMIT:-512m}
+    cpus: 0.75
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  postgres_data:
