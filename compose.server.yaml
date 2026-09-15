@@ -18,8 +18,8 @@ services:
       - work_mem=1MB
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./backend/resources/file_uploads_table.sql:/docker-entrypoint-initdb.d/02-file-uploads.sql:ro
+      - ./backend/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro,Z
+      - ./backend/resources/file_uploads_table.sql:/docker-entrypoint-initdb.d/02-file-uploads.sql:ro,Z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
