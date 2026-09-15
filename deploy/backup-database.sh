@@ -8,7 +8,8 @@ set -a
 . ./.env
 set +a
 
-docker compose exec -T database pg_dump \
+compose_file="${COMPOSE_FILE:-compose.yaml}"
+docker compose -f "$compose_file" exec -T database pg_dump \
   -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc \
   > "backups/tangshe-$timestamp.dump"
 

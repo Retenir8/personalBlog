@@ -37,7 +37,8 @@ set -a
 . ./.env
 set +a
 
-docker compose exec -T database psql -v ON_ERROR_STOP=1 \
+compose_file="${COMPOSE_FILE:-compose.yaml}"
+docker compose -f "$compose_file" exec -T database psql -v ON_ERROR_STOP=1 \
   -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
   -f /dev/stdin < backend/resources/seed_realistic_data.sql
 

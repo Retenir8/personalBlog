@@ -5,6 +5,7 @@
 - `frontend/`：Next.js 前端，使用 standalone 生产镜像。
 - `backend/`：Spring Boot 后端，使用 Java 21 精简运行镜像。
 - `compose.yaml`：前端、后端、PostgreSQL 三服务编排。
+- `compose.server.yaml`：接入现有 `deploy_app` 代理网络的低资源生产编排。
 - `deploy/`：部署、备份、模拟数据和 Nginx 模板。
 
 ## 快速部署
@@ -23,6 +24,12 @@ chmod +x deploy/*.sh
 - PostgreSQL：不映射宿主机端口
 
 请使用宿主机 Nginx 将域名 `/` 转发到前端，将 `/api/` 转发到后端。
+
+目标服务器已有 `deploy_app` 反向代理网络时，请在 `.env` 中保留
+`COMPOSE_FILE=compose.server.yaml`。该编排只把 3000/3001 绑定到服务器回环地址，
+数据库完全不发布端口；现有 Nginx 可通过 `tangshe-frontend` 与
+`tangshe-backend` 网络别名访问服务。HTTP/HTTPS 配置位于
+`deploy/nginx-tangshe.*.conf`。
 
 ## 创建真实姓名风格的模拟数据
 

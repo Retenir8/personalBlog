@@ -8,9 +8,14 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-docker compose config >/dev/null
-docker compose up -d --build
-docker compose ps
+set -a
+. ./.env
+set +a
+
+compose_file="${COMPOSE_FILE:-compose.yaml}"
+docker compose -f "$compose_file" config >/dev/null
+docker compose -f "$compose_file" up -d --build
+docker compose -f "$compose_file" ps
 
 echo "部署命令已完成。请检查："
 echo "  curl http://127.0.0.1:3000/home"
